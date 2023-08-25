@@ -115,6 +115,16 @@ interface IBEP20 {
 
 //资金池相关
 
+interface IAlpha {
+    function token()  external view returns (address);
+    function totalToken() external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function deposit(uint256 amount) payable external;
+    function withdraw(uint256 amount) external;
+    function balanceOf(address) external view returns (uint256);
+}
+
+
 interface IMining {
 
     function deposit(address _for, uint256 _pid, uint256 _amount) external;
