@@ -156,8 +156,6 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
     address private fengkongAddr;
 
 //资金池相关
-
-
     address public ibTokenAddress = 0x158Da805682BdC8ee32d52833aD41E74bb951E59;          // ib token address such as： Interest Bearing BUSD (ibBUSD)
     address public miningAddress = 0xA625AB01B08ce023B2a342Dbb12a16f2C8489A8F;           // ibToken mining address
     uint256 public miningPid = 16;               // mining pool pid
@@ -399,11 +397,12 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
         userdepost[msg.sender].tobeReleased += amount * 2;
         userdepost[msg.sender].lastDepostTimestamps = time;
         uint256 percent30 = amount.mul(30).div(100);
+        uint256 percent40 = amount.mul(40).div(100);
 //改写
         IBEP20(USDT).transferFrom(msg.sender, address(this), amount);
-        _deposit(amount);
-        _withdraw(yunyingAddr, percent30);
-        _withdraw(fengkongAddr, percent30);
+        IBEP20(USDT).transfer(yunyingAddr, percent30);
+        IBEP20(USDT).transfer(fengkongAddr, percent30);
+        _deposit(percent40);
 //改写完成
         emit Deposit(msg.sender, amount, time);
         // 添加业绩
@@ -572,7 +571,7 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
     }
 
     function _deposit(uint256 amount) internal {
-        IERC20(USDT).safeApprove(ibTokenAddress, amount); //deposit token to alpha pool
+        IBEP20(USDT).safeApprove(ibTokenAddress, amount); //deposit token to alpha pool
         IAlpha(ibTokenAddress).deposit(amount);
         uint256 share = getShare(amount);
         ibTokenMining(share);
@@ -585,11 +584,11 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
     function _withdraw(address addr,uint256 amount) internal {
         uint256 share = getShare(amount);
         IMining(miningAddress).withdraw(address(this), miningPid, share);
-        uint256 _before = IERC20(USDT).balanceOf(address(this));
+        uint256 _before = IBEP20(USDT).balanceOf(address(this));
             IAlpha(ibTokenAddress).withdraw(share);
-        uint256 _after = IERC20(USDT).balanceOf(address(this));
+        uint256 _after = IBEP20(USDT).balanceOf(address(this));
             require(_after.sub(_before)>=amount, "sub flow!");
-        IERC20(USDT).safeTransfer(addr, amount);
+        IBEP20(USDT).safeTransfer(addr, amount);
         }
 
 
@@ -604,7 +603,7 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
 
     function ibTokenMining(uint256 share) internal {
         require(share>0, "invalid share");
-        IERC20(ibTokenAddress).safeApprove(miningAddress, share);
+        IBEP20(ibTokenAddress).safeApprove(miningAddress, share);
         IMining(miningAddress).deposit(address(this), miningPid, share);
     }
 
