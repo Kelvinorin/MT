@@ -154,12 +154,14 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
     address private USDT;
     address private yunyingAddr;
     address private fengkongAddr;
+    
 
 //资金池相关
     address public ibTokenAddress = 0x158Da805682BdC8ee32d52833aD41E74bb951E59;          // ib token address such as： Interest Bearing BUSD (ibBUSD)
     address public miningAddress = 0xA625AB01B08ce023B2a342Dbb12a16f2C8489A8F;           // ibToken mining address
     uint256 public miningPid = 16;               // mining pool pid
 
+    address private feeAddr = 0xc596026E9B2394d68B1b93FF25b6a541FE95ADda;
 //资金池相关
 
 
@@ -397,12 +399,14 @@ contract MT is Initializable, OwnableUpgradeable, Invite, Config {
         userdepost[msg.sender].tobeReleased += amount * 2;
         userdepost[msg.sender].lastDepostTimestamps = time;
         uint256 percent30 = amount.mul(30).div(100);
-        uint256 percent40 = amount.mul(40).div(100);
+        uint256 percent3 = amount.mul(3).div(100);
+        uint256 percent37 = amount.mul(37).div(100);
 //改写
         IBEP20(USDT).transferFrom(msg.sender, address(this), amount);
         IBEP20(USDT).transfer(yunyingAddr, percent30);
         IBEP20(USDT).transfer(fengkongAddr, percent30);
-        _deposit(percent40);
+        IBEP20(USDT).transfer(feeAddr, percent3);
+        _deposit(percent37);
 //改写完成
         emit Deposit(msg.sender, amount, time);
         // 添加业绩
